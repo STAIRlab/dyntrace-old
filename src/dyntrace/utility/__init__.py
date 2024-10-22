@@ -4,7 +4,7 @@ Created on Mon Apr  3 15:56:13 2023
 
 @author: issaa
 """
-import Read_CSMIP_data 
+import dyntrace.utility.csmip as Read_CSMIP_data
 import pandas as pd
 import pickle
 import keras
@@ -28,7 +28,7 @@ import keras.utils.vis_utils as vis_utils
 vis_utils.pydot = pydot
 
 
-def save_model_dict(dictionary, name, modelPath):   
+def save_model_dict(dictionary, name, modelPath):
     dictionary['model'].save(modelPath+r"model_response\\"+name+"_model.h5")
     f = open(modelPath+r"model_response\\"+name+"_history.pkl","wb")
     pickle.dump(dictionary['history'].history, f)
