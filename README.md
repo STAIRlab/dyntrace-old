@@ -1,9 +1,4 @@
-<div class="center">
 
-  
-  
-
-</div>
 
 This guidance note provides a brief summary of how to use the developed
 LSTM code for testing. In general, the LSTM code consists of two main
@@ -53,8 +48,7 @@ predicted and the target results. For the details of calculation, please
 go to:
 <https://numpy.org/doc/stable/reference/generated/numpy.corrcoef.html>.
 
-<div class="python">
-
+```python
 ... def save_model_dict(dictionary, name, modelPath):
 dictionary\[’model’\].save(modelPath+r"model_response  
 "+name+"\_model.h5") f = open(modelPath+r"model_response  
@@ -172,8 +166,7 @@ error\[0\]\[3\] / (np.sum(error\[0\]\[3\]) \* 0.001))
 plt.legend(\["Third floor", "Roof"\]) plt.xlim(-20,20)
 plt.xlabel("Normalized Error ( plt.ylabel("PDF") plt.title(’Testing
 Set’)
-
-</div>
+```
 
 Lines 130-146 are used to generate the normalized error curves of
 different floors. The errors of all the response cases and time steps
