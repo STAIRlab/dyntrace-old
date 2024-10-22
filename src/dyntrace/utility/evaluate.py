@@ -4,7 +4,7 @@ Created on Mon Apr  3 15:56:13 2023
 
 @author: issaa
 """
-import Read_CSMIP_data 
+import .csmip as Read_CSMIP_data
 import pandas as pd
 import pickle
 import keras
@@ -29,7 +29,7 @@ import keras.utils.vis_utils as vis_utils
 vis_utils.pydot = pydot
 
 
-def save_model_dict(dictionary, name, modelPath):   
+def save_model_dict(dictionary, name, modelPath):
     dictionary['model'].save(modelPath+r"model_response\\"+name+"_model.h5")
     f = open(modelPath+r"model_response\\"+name+"_history.pkl","wb")
     pickle.dump(dictionary['history'].history, f)
@@ -54,7 +54,7 @@ def load_model_dict(name, modelPath):
     return dictionary
 
 if __name__ == "__main__":
-    
+
     #specify the train_folder_path and the test_folder_path
     #specify time step (each seismic event has different timesteps, so need to define manually)
     #specify output_response (e.g. Accel data in Channel 3, 5, 8 => then 3)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     time_step = 30000
     output_response = 5
     window_size = 1
-    
+
     #CSMIP data is read into "train_file" and "test_file".
     train_file = Read_CSMIP_data.Read_CSMIP_data(train_folder_path, time_step, output_response, window_size)
     test_file = Read_CSMIP_data.Read_CSMIP_data(test_folder_path, time_step, output_response, window_size)
@@ -73,12 +73,12 @@ if __name__ == "__main__":
     #The required 3d array will be generated for training/testing
     datax, datay = train_file.generate_3d_array()
     testx, testy = test_file.generate_3d_array()
-    
+
     # load the trained model
     modelPath = r'C:\Users\BRACE2\Desktop\CSMIP\model\\'
     model_dict = load_model_dict("tcn10_20_512", modelPath)
     model = model_dict['model']
-    
+
     #load the best trained model
     # modelPath = r'C:\Users\BRACE2\Desktop\CSMIP\model\\'
     # model = load_model(modelPath + "my_best_model.h5")
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     error = np.load("errors_new.npy")
     
     print(error.shape)
-    
+
     # Print the error graph, a better result will lead to an error curve centralized to 0.
     plt.figure()
     plt.plot(np.arange(-20, 20, 0.1), error[0][0] / (np.sum(error[0][0]) * 0.001))
@@ -206,14 +206,8 @@ if __name__ == "__main__":
     plt.xlabel("Normalized Error (%)")
     plt.ylabel("PDF")
     plt.title('Testing Set')
-    
+
     dataDir = r'C:\Users\BRACE2\Desktop\CSMIP\\'  # Replace the directory
     scipy.io.savemat(dataDir+'results/SanBernardino/results(LA54_NS_withCh13).mat',
                      {'y_predict': testpredict, 'y_true': testy})
-    
-    
-    
-    
-    
-    
-    
+
