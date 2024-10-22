@@ -14,17 +14,17 @@ import matplotlib.pyplot as plt
 
 class Read_CSMIP_data():
     def __init__(self, filePath, time_step, output_response, window_size):
-        
+
         self.CSMIP_folder_path = filePath
         self.time_step = time_step
         self.output_response = output_response
         self.window_size = window_size
-        
+
     def split_by_n(self, seq, n):
         while seq:
             yield seq[:n]
             seq = seq[n:]
-    
+
     def read_response(self, fileName):
         with open(fileName, 'r') as file:
             Lines = file.readlines()
@@ -33,22 +33,22 @@ class Read_CSMIP_data():
                     accel_index = index
                 elif ("End of Data" in item):
                     end_index = index
-                
+
             accel_lines = Lines[accel_index + 1: end_index]
-            
-    
+
+
             num_char = 9
-            
+
             accel_data = []
             for item in accel_lines:
                 data =  list(self.split_by_n(item, num_char))
                 for datum in data:
-                    if len(datum) == num_char: 
+                    if len(datum) == num_char:
                         accel_data.append(datum)
-            
-        
+
+
             return accel_data
-    
+
     def Generate_data(self, X_data0, y_data0, window_size=50):
         X_new_temp = []
         y_new_temp = []
@@ -61,34 +61,34 @@ class Read_CSMIP_data():
                 X_new.append(X_temp[jj * window_size:(jj + 1) * window_size])
                 y_new.append(y_temp[(jj + 1) * window_size - 1, :])
                 # y_new.append(y_temp[(jj + 1) * window_size - 1])
-    
+
             X_new_temp.append(np.array(X_new))
             y_new_temp.append(np.array(y_new))
-    
+
         X_data_new0 = np.array(X_new_temp)
         y_data_new0 = np.array(y_new_temp)
-    
+
         return X_data_new0, y_data_new0
-    
+
     def butter_highpass_filter_1D(self, time_series_array, cutoff_freq, sampling_freq):
-        
+
         nyquist_freq = 0.5 * sampling_freq
         normalized_cutoff = cutoff_freq / nyquist_freq
-        
+
         # Set up Butterworth filter
         b, a = butter(2, normalized_cutoff, btype='highpass')
         # sos = butter(2, cutoff_freq, btype='highpass',  fs=sampling_freq, output='sos')
 
         # Apply filter to time series array
         filtered_array = filtfilt(b, a, time_series_array)
-        
-        
+
+
         return filtered_array
     def butter_lowpass_filter_1D(self, time_series_array, cutoff_freq, sampling_freq):
-        
+
         nyquist_freq = 0.5 * sampling_freq
         normalized_cutoff = cutoff_freq / nyquist_freq
-        
+
         # Set up Butterworth filter
         b, a = butter(2, normalized_cutoff, btype='lowpass')
         # sos = butter(2, cutoff_freq, btype='highpass',  fs=sampling_freq, output='sos')
@@ -96,16 +96,16 @@ class Read_CSMIP_data():
         # Apply filter to time series array
         filtered_array = filtfilt(b, a, time_series_array)
         return filtered_array
-    
+
     def resample_1d_array(self, array, original_freq, target_freq):
         """
         Resample a 1D numpy array from a given frequency to a target frequency using linear interpolation.
-        
+
         Parameters:
         array (numpy.ndarray): The 1D numpy array to resample.
         original_freq (float): The original frequency of the array.
         target_freq (float): The target frequency to resample the array to.
-        
+
         Returns:
         numpy.ndarray: The resampled array.
         """
@@ -114,16 +114,16 @@ class Read_CSMIP_data():
         return np.interp(target_time_stamps, time_stamps, array)
 
     def generate_3d_array(self):
-        
+
         accel_channel_comb = np.zeros((1, self.time_step, 1))
         accel_GM_comb = np.zeros((1, self.time_step, self.output_response))
-        
+
         files = os.listdir(self.CSMIP_folder_path )
-        
+
         for index, file_name in enumerate(files):
             channels_path = self.CSMIP_folder_path + r'\\'+ file_name
             channels_files = os.listdir(channels_path )
-            
+
             for item in channels_files:
                 channel_fileName = channels_path + r'\\' + item
                 accel_output = np.array(self.read_response(channel_fileName),dtype=float) 
@@ -147,50 +147,50 @@ class Read_CSMIP_data():
                     # plt.legend()
                     # plt.show()
                     # accel_output = accel_output_resample
-                    
+
 
                 # Pad zero terms at the end of the array if the time step is less than self.timestep
                 time_step = len(accel_output)
                 accel_output = np.pad(accel_output, (0, self.time_step - time_step),mode='constant')
                 # time_step = len(displ_output)
                 # displ_output = np.pad(displ_output, (0, self.time_step - time_step),mode='constant')
-                
+
                 accel_output = np.reshape(accel_output, [1 , self.time_step, 1]) 
                 # accel_output = self.butter_highpass_filter(accel_output, 0.1, 100)
                 accel_channel_comb = np.append(accel_channel_comb,accel_output,axis=2)
-                
+
             accel_channel_comb = accel_channel_comb[:,:,1:]  
             accel_GM_comb = np.append(accel_GM_comb,accel_channel_comb,axis=0)
             accel_channel_comb = np.zeros((1, self.time_step, 1))
-            
+
         accel_GM_comb = accel_GM_comb[1:,:,:]  
 
         X_data = accel_GM_comb[:,:,0]
         y_data = accel_GM_comb[:,:,1:]
-        
+
         X_data = np.reshape(X_data, [X_data.shape[0], X_data.shape[1], 1])
-        
+
         # Scale data
         # X_data_flatten = np.reshape(X_data, [X_data.shape[0]*X_data.shape[1], 1])
         # scaler_X = MinMaxScaler(feature_range=(-1, 1))
         # scaler_X.fit(X_data_flatten)
         # X_data_flatten_map = scaler_X.transform(X_data_flatten)
         # X_data_map = np.reshape(X_data_flatten_map, [X_data.shape[0], X_data.shape[1], 1])
-        
+
         # y_data_flatten = np.reshape(y_data, [y_data.shape[0]*y_data.shape[1], y_data.shape[2]])
         # scaler_y = MinMaxScaler(feature_range=(-1, 1))
         # scaler_y.fit(y_data_flatten)
         # y_data_flatten_map = scaler_y.transform(y_data_flatten)
         # y_data_map = np.reshape(y_data_flatten_map, [y_data.shape[0], y_data.shape[1], y_data.shape[2]])
-        
+
         # Normalize data
         # X_data_normalized = tf.keras.utils.normalize(X_data, axis=1)
         # y_data_normalized = tf.keras.utils.normalize(y_data, axis=1)
         X_data_new, y_data_new = self.Generate_data(X_data, y_data, self.window_size)
-        
+
         X_data_new = np.reshape(X_data_new, [X_data_new.shape[0], X_data_new.shape[1], X_data_new.shape[2]])
-        
+
         return X_data_new , y_data_new
 #if __name__ == "__main__":
-    
-    
+
+

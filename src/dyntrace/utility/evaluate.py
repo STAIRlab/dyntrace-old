@@ -4,7 +4,7 @@ Created on Mon Apr  3 15:56:13 2023
 
 @author: issaa
 """
-import .csmip as Read_CSMIP_data
+import dyntrace.utility.csmip as Read_CSMIP_data
 import pandas as pd
 import pickle
 import keras

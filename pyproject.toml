@@ -10,12 +10,18 @@ readme = "README.md"
 keywords = [
   "seismic",
   "earthquake",
-] 
+]
 
 dependencies = [
   "numpy",
   "scipy",
   "sympy",
+  "keras",
+  "pydot",
+  "seaborn",
+  "tensorflow",
+  "pandas",
+  "scikit-learn",
   "opensees"
 ]
 
