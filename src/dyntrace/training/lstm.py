@@ -4,7 +4,7 @@ Created on Sun Feb 19 17:42:44 2023
 
 @author: Issac
 """
-import Read_CSMIP_data 
+import dyntrace.utility.csmip as Read_CSMIP_data
 import pandas as pd
 import numpy as np
 import os
